@@ -1,5 +1,5 @@
-import { Image, View } from 'react-native';
-import { Tabs } from 'expo-router';
+import { Image, View, TouchableOpacity } from 'react-native';
+import { Tabs, useRouter } from 'expo-router';
 
 const COLORES = {
   noticias: '#1B4D3E',
@@ -35,6 +35,19 @@ function LogoCabecera() {
   );
 }
 
+function BotonAdmin() {
+  const router = useRouter();
+  return (
+    <TouchableOpacity onPress={() => router.push('/login')} style={{ marginRight: 16 }}>
+      <Image
+        source={require('../../assets/icono_candado.png')}
+        style={{ width: 26, height: 26, tintColor: '#fff' }}
+        resizeMode="contain"
+      />
+    </TouchableOpacity>
+  );
+}
+
 export default function TabsLayout() {
   return (
     <Tabs
@@ -63,6 +76,7 @@ export default function TabsLayout() {
           headerTintColor: '#fff',
           headerTitleStyle: { fontWeight: 'bold', fontSize: 18 },
           headerLeft: () => <LogoCabecera />,
+          headerRight: () => <BotonAdmin />,
         }}
       />
       <Tabs.Screen
@@ -78,6 +92,7 @@ export default function TabsLayout() {
           headerTintColor: '#fff',
           headerTitleStyle: { fontWeight: 'bold', fontSize: 18 },
           headerLeft: () => <LogoCabecera />,
+          headerRight: () => <BotonAdmin />,
         }}
       />
       <Tabs.Screen
@@ -93,6 +108,7 @@ export default function TabsLayout() {
           headerTintColor: '#fff',
           headerTitleStyle: { fontWeight: 'bold', fontSize: 18 },
           headerLeft: () => <LogoCabecera />,
+          headerRight: () => <BotonAdmin />,
         }}
       />
       <Tabs.Screen
@@ -108,11 +124,13 @@ export default function TabsLayout() {
           headerTintColor: '#fff',
           headerTitleStyle: { fontWeight: 'bold', fontSize: 18 },
           headerLeft: () => <LogoCabecera />,
+          headerRight: () => <BotonAdmin />,
         }}
       />
       <Tabs.Screen name="noticias/[id]" options={{ href: null }} />
       <Tabs.Screen name="eventos/[id]" options={{ href: null }} />
       <Tabs.Screen name="comarca/[id]" options={{ href: null }} />
+      <Tabs.Screen name="admin" options={{ href: null }} />
     </Tabs>
   );
 }
