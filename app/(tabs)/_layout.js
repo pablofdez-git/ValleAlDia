@@ -51,7 +51,7 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
-        name="noticias"
+        name="noticias/index"
         options={{
           title: 'Noticias',
           tabBarActiveTintColor: COLORES.noticias,
@@ -125,6 +125,10 @@ export default function TabsLayout() {
           headerTitleStyle: { fontWeight: 'bold', fontSize: 18 },
           headerLeft: () => <LogoCabecera />,
         }}
+      />
+      <Tabs.Screen
+        name="noticias/[id]"
+        options={{ href: null }}
       />
     </Tabs>
   );
