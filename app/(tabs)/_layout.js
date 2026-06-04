@@ -96,7 +96,7 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="comarca"
+        name="comarca/index"
         options={{
           title: 'Comarca',
           tabBarActiveTintColor: COLORES.comarca,
@@ -112,6 +112,7 @@ export default function TabsLayout() {
       />
       <Tabs.Screen name="noticias/[id]" options={{ href: null }} />
       <Tabs.Screen name="eventos/[id]" options={{ href: null }} />
+      <Tabs.Screen name="comarca/[id]" options={{ href: null }} />
     </Tabs>
   );
 }
