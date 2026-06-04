@@ -47,7 +47,7 @@ export default function TabsLayout() {
           paddingBottom: 50,
           paddingTop: 8,
         },
-        tabBarLabelStyle: { fontSize: 13, fontWeight: '700', marginBottom: 6, },
+        tabBarLabelStyle: { fontSize: 13, fontWeight: '700', marginBottom: 6 },
       }}
     >
       <Tabs.Screen
@@ -57,11 +57,7 @@ export default function TabsLayout() {
           tabBarActiveTintColor: COLORES.noticias,
           tabBarInactiveTintColor: '#999',
           tabBarIcon: ({ focused }) => (
-            <IconoImagen
-              fuente={require('../../assets/icono_altavoz.png')}
-              focused={focused}
-              color={COLORES.noticias}
-            />
+            <IconoImagen fuente={require('../../assets/icono_altavoz.png')} focused={focused} color={COLORES.noticias} />
           ),
           headerStyle: { backgroundColor: COLORES.noticias },
           headerTintColor: '#fff',
@@ -70,17 +66,13 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="eventos"
+        name="eventos/index"
         options={{
           title: 'Eventos',
           tabBarActiveTintColor: COLORES.eventos,
           tabBarInactiveTintColor: '#999',
           tabBarIcon: ({ focused }) => (
-            <IconoImagen
-              fuente={require('../../assets/icono_calendario.png')}
-              focused={focused}
-              color={COLORES.eventos}
-            />
+            <IconoImagen fuente={require('../../assets/icono_calendario.png')} focused={focused} color={COLORES.eventos} />
           ),
           headerStyle: { backgroundColor: COLORES.eventos },
           headerTintColor: '#fff',
@@ -95,11 +87,7 @@ export default function TabsLayout() {
           tabBarActiveTintColor: COLORES.incidencias,
           tabBarInactiveTintColor: '#999',
           tabBarIcon: ({ focused }) => (
-            <IconoImagen
-              fuente={require('../../assets/icono_exclamacion.png')}
-              focused={focused}
-              color={COLORES.incidencias}
-            />
+            <IconoImagen fuente={require('../../assets/icono_exclamacion.png')} focused={focused} color={COLORES.incidencias} />
           ),
           headerStyle: { backgroundColor: COLORES.incidencias },
           headerTintColor: '#fff',
@@ -114,11 +102,7 @@ export default function TabsLayout() {
           tabBarActiveTintColor: COLORES.comarca,
           tabBarInactiveTintColor: '#999',
           tabBarIcon: ({ focused }) => (
-            <IconoImagen
-              fuente={require('../../assets/icono_comarca.png')}
-              focused={focused}
-              color={COLORES.comarca}
-            />
+            <IconoImagen fuente={require('../../assets/icono_comarca.png')} focused={focused} color={COLORES.comarca} />
           ),
           headerStyle: { backgroundColor: COLORES.comarca },
           headerTintColor: '#fff',
@@ -126,10 +110,8 @@ export default function TabsLayout() {
           headerLeft: () => <LogoCabecera />,
         }}
       />
-      <Tabs.Screen
-        name="noticias/[id]"
-        options={{ href: null }}
-      />
+      <Tabs.Screen name="noticias/[id]" options={{ href: null }} />
+      <Tabs.Screen name="eventos/[id]" options={{ href: null }} />
     </Tabs>
   );
 }
