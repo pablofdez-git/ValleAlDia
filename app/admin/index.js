@@ -37,6 +37,14 @@ export default function Admin() {
         </View>
       </TouchableOpacity>
 
+      <TouchableOpacity style={[styles.boton, { backgroundColor: '#2E86AB' }]} onPress={() => router.push('/admin/gestionar-noticias')}>
+        <Text style={styles.botonIcono}>📋</Text>
+        <View>
+          <Text style={styles.botonTitulo}>Gestionar noticias</Text>
+          <Text style={styles.botonSub}>Edita o elimina noticias</Text>
+        </View>
+      </TouchableOpacity>
+
       <TouchableOpacity style={[styles.boton, { backgroundColor: '#1A5276' }]} onPress={() => router.push('/admin/evento')}>
         <Text style={styles.botonIcono}>📅</Text>
         <View>
@@ -45,11 +53,27 @@ export default function Admin() {
         </View>
       </TouchableOpacity>
 
+      <TouchableOpacity style={[styles.boton, { backgroundColor: '#2E86AB' }]} onPress={() => router.push('/admin/gestionar-eventos')}>
+        <Text style={styles.botonIcono}>📋</Text>
+        <View>
+          <Text style={styles.botonTitulo}>Gestionar eventos</Text>
+          <Text style={styles.botonSub}>Edita o elimina eventos</Text>
+        </View>
+      </TouchableOpacity>
+
       <TouchableOpacity style={[styles.boton, { backgroundColor: '#6C3483' }]} onPress={() => router.push('/admin/evento-comarca')}>
         <Text style={styles.botonIcono}>🗺️</Text>
         <View>
           <Text style={styles.botonTitulo}>Evento comarca</Text>
           <Text style={styles.botonSub}>Añade un evento de la comarca</Text>
+        </View>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={[styles.boton, { backgroundColor: '#2E86AB' }]} onPress={() => router.push('/admin/gestionar-comarca')}>
+        <Text style={styles.botonIcono}>📋</Text>
+        <View>
+          <Text style={styles.botonTitulo}>Gestionar comarca</Text>
+          <Text style={styles.botonSub}>Edita o elimina eventos de comarca</Text>
         </View>
       </TouchableOpacity>
 
@@ -70,7 +94,7 @@ export default function Admin() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5' },
-  contenido: { padding: 20, paddingTop: 40 },
+  contenido: { padding: 20, paddingTop: 40, paddingTop: 40, paddingBottom: 60 },
   bienvenida: { fontSize: 22, fontWeight: '800', color: '#1a1a1a', marginBottom: 4 },
   subtitulo: { fontSize: 14, color: '#999', marginBottom: 28 },
   boton: {
