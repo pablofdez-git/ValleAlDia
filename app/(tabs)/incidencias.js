@@ -1,12 +1,49 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView, ActivityIndicator, Image } from 'react-native';
 import { supabase } from '../../lib/supabase';
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system/legacy'; // Usamos legacy como antes
+import { decode } from 'base64-arraybuffer';
 
 export default function Incidencias() {
+  const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
+  const [imagenLocal, setImagenLocal] = useState(null);
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
-  const [titulo, setTitulo] = useState('');
+
+  async function seleccionarImagen() {
+    const resultado = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      quality: 0.6, // Bajamos un poco la calidad para que pese menos
+    });
+
+    if (!resultado.canceled) {
+      setImagenLocal(resultado.assets[0]);
+    }
+  }
+
+  async function subirImagen(asset) {
+    const base64 = await FileSystem.readAsStringAsync(asset.uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    const arrayBuffer = decode(base64);
+    const ext = asset.uri.split('.').pop().toLowerCase();
+    const nombreArchivo = `${Date.now()}.${ext}`;
+    const rutaArchivo = `incidencias/${nombreArchivo}`; // Carpeta diferente a noticias
+
+    const { error } = await supabase.storage
+      .from('imagenes')
+      .upload(rutaArchivo, arrayBuffer, {
+        contentType: `image/${ext === 'jpg' ? 'jpeg' : ext}`,
+      });
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage.from('imagenes').getPublicUrl(rutaArchivo);
+    return publicUrl;
+  }
 
   async function enviarIncidencia() {
     if (!titulo.trim() || !descripcion.trim()) {
@@ -15,19 +52,29 @@ export default function Incidencias() {
     }
 
     setEnviando(true);
-    const { error } = await supabase
-      .from('incidencias')
-      .insert([{ titulo: titulo.trim(), descripcion: descripcion.trim(), estado: 'pendiente' }]);
+    try {
+      let urlFinal = null;
+      if (imagenLocal) {
+        urlFinal = await subirImagen(imagenLocal);
+      }
 
-    if (error) {
-      Alert.alert('Error', 'No se pudo enviar la incidencia. Inténtalo de nuevo.');
-      console.error(error);
-    } else {
+      const { error } = await supabase
+        .from('incidencias')
+        .insert([{
+          titulo: titulo.trim(),
+          descripcion: descripcion.trim(),
+          estado: 'pendiente',
+          imagen_url: urlFinal
+        }]);
+
+      if (error) throw error;
       setEnviado(true);
-      setTitulo('');
-      setDescripcion('');
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo enviar la incidencia.');
+      console.error(error);
+    } finally {
+      setEnviando(false);
     }
-    setEnviando(false);
   }
 
   if (enviado) {
@@ -35,8 +82,7 @@ export default function Incidencias() {
       <View style={styles.centrado}>
         <Text style={styles.checkmark}>✅</Text>
         <Text style={styles.gracias}>¡Incidencia enviada!</Text>
-        <Text style={styles.graciasSub}>Gracias por avisar. La revisaremos lo antes posible.</Text>
-        <TouchableOpacity style={styles.botonOtra} onPress={() => setEnviado(false)}>
+        <TouchableOpacity style={styles.botonOtra} onPress={() => { setEnviado(false); setImagenLocal(null); setTitulo(''); setDescripcion(''); }}>
           <Text style={styles.botonOtraTexto}>Enviar otra incidencia</Text>
         </TouchableOpacity>
       </View>
@@ -46,48 +92,27 @@ export default function Incidencias() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contenido}>
       <Text style={styles.titulo}>Reportar una incidencia</Text>
-      <Text style={styles.subtitulo}>
-        ¿Has visto algún problema en el pueblo? Cuéntanos y lo atenderemos lo antes posible.
-      </Text>
 
-      <View style={styles.campo}>
-        <Text style={styles.label}>Título</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Ej: Farola rota"
-          placeholderTextColor="#aaa"
-          value={titulo}
-          onChangeText={setTitulo}
-          maxLength={100}
-        />
-      </View>
+      <TextInput style={styles.input} placeholder="Título (ej: Farola rota)" value={titulo} onChangeText={setTitulo} />
 
-      <View style={styles.campo}>
-        <Text style={styles.label}>Descripción del problema</Text>
-        <TextInput
-          style={styles.textarea}
-          placeholder="Ej: Hay una farola rota..."
-          placeholderTextColor="#aaa"
-          multiline
-          numberOfLines={6}
-          textAlignVertical="top"
-          value={descripcion}
-          onChangeText={setDescripcion}
-          maxLength={500}
-        />
-        <Text style={styles.contador}>{descripcion.length}/500</Text>
-      </View>
+      <TextInput
+        style={styles.textarea}
+        placeholder="Descripción detallada..."
+        multiline
+        value={descripcion}
+        onChangeText={setDescripcion}
+      />
 
-      <TouchableOpacity
-        style={[styles.boton, enviando && styles.botonDesactivado]}
-        onPress={enviarIncidencia}
-        disabled={enviando}
-      >
-        {enviando ? (
-          <ActivityIndicator color="#fff" />
+      <TouchableOpacity style={styles.botonImagen} onPress={seleccionarImagen}>
+        {imagenLocal ? (
+          <Image source={{ uri: imagenLocal.uri }} style={styles.preview} />
         ) : (
-          <Text style={styles.botonTexto}>Enviar incidencia</Text>
+          <Text style={styles.botonImagenTexto}>📷 Adjuntar foto (opcional)</Text>
         )}
+      </TouchableOpacity>
+
+      <TouchableOpacity style={[styles.boton, enviando && styles.botonDesactivado]} onPress={enviarIncidencia} disabled={enviando}>
+        {enviando ? <ActivityIndicator color="#fff" /> : <Text style={styles.botonTexto}>Enviar incidencia</Text>}
       </TouchableOpacity>
     </ScrollView>
   );
@@ -98,41 +123,16 @@ const styles = StyleSheet.create({
   contenido: { padding: 20 },
   centrado: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
   checkmark: { fontSize: 64, marginBottom: 16 },
-  gracias: { fontSize: 22, fontWeight: '800', color: '#1a1a1a', marginBottom: 8, textAlign: 'center' },
-  graciasSub: { fontSize: 15, color: '#666', textAlign: 'center', lineHeight: 22, marginBottom: 32 },
-  botonOtra: { borderWidth: 2, borderColor: '#C0392B', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 24 },
-  botonOtraTexto: { color: '#C0392B', fontWeight: '700', fontSize: 15 },
-  titulo: { fontSize: 22, fontWeight: '800', color: '#1a1a1a', marginBottom: 8 },
-  subtitulo: { fontSize: 14, color: '#666', lineHeight: 21, marginBottom: 28 },
-  campo: { marginBottom: 20 },
-  label: { fontSize: 14, fontWeight: '700', color: '#333', marginBottom: 8 },
-  textarea: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 15,
-    color: '#333',
-    minHeight: 140,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  contador: { fontSize: 12, color: '#999', textAlign: 'right', marginTop: 4 },
-  boton: {
-    backgroundColor: '#C0392B',
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: 8,
-  },
+  gracias: { fontSize: 22, fontWeight: '800', marginBottom: 32 },
+  titulo: { fontSize: 22, fontWeight: '800', marginBottom: 20 },
+  input: { backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: '#e0e0e0' },
+  textarea: { backgroundColor: '#fff', borderRadius: 12, padding: 14, minHeight: 120, marginBottom: 16, borderWidth: 1, borderColor: '#e0e0e0' },
+  botonImagen: { backgroundColor: '#fff', height: 120, borderRadius: 12, borderWidth: 1, borderColor: '#e0e0e0', borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center', marginBottom: 20, overflow: 'hidden' },
+  botonImagenTexto: { color: '#666', fontWeight: '600' },
+  preview: { width: '100%', height: '100%' },
+  boton: { backgroundColor: '#C0392B', borderRadius: 12, paddingVertical: 16, alignItems: 'center' },
   botonDesactivado: { opacity: 0.6 },
   botonTexto: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  input: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 15,
-    color: '#333',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
+  botonOtra: { padding: 15 },
+  botonOtraTexto: { color: '#C0392B', fontWeight: '700' }
 });
