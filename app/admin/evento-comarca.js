@@ -1,84 +1,96 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, Stack } from 'expo-router';
 import { supabase } from '../../lib/supabase';
 
 export default function NuevoEventoComarca() {
-  const [titulo, setTitulo] = useState('');
-  const [descripcion, setDescripcion] = useState('');
-  const [fecha, setFecha] = useState('');
-  const [lugar, setLugar] = useState('');
-  const [pueblo, setPueblo] = useState('');
+  const [form, setForm] = useState({ pueblo: '', titulo: '', descripcion: '', fecha: '', hora: '', lugar: '' });
   const [enviando, setEnviando] = useState(false);
   const router = useRouter();
 
+  const actualizar = (campo, valor) => setForm({ ...form, [campo]: valor });
+
+  const prepararFechaParaDB = (fechaLatina) => {
+    const partes = fechaLatina.split('-');
+    if (partes.length !== 3) return null;
+    return `${partes[2]}-${partes[1]}-${partes[0]}`;
+  };
+
   async function publicar() {
-    if (!titulo.trim() || !descripcion.trim() || !fecha.trim() || !lugar.trim() || !pueblo.trim()) {
+    const { pueblo, titulo, descripcion, fecha, hora, lugar } = form;
+    if (!pueblo.trim() || !titulo.trim() || !descripcion.trim() || !fecha.trim() || !lugar.trim() || !hora.trim()) {
       Alert.alert('Campos vacíos', 'Todos los campos son obligatorios.');
       return;
     }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
-      Alert.alert('Fecha incorrecta', 'Usa el formato AAAA-MM-DD. Ej: 2026-07-15');
+
+    // Validación formato español
+    if (!/^\d{2}-\d{2}-\d{4}$/.test(fecha)) {
+      Alert.alert('Fecha incorrecta', 'Usa el formato DD-MM-AAAA. Ej: 15-07-2026');
       return;
     }
+
+    const fechaDB = prepararFechaParaDB(fecha);
+
     setEnviando(true);
     const { error } = await supabase.from('eventos_comarca').insert([{
-      titulo: titulo.trim(),
-      descripcion: descripcion.trim(),
-      fecha: fecha.trim(),
-      lugar: lugar.trim(),
-      pueblo: pueblo.trim(),
+      ...form,
+      fecha: fechaDB
     }]);
+
     if (error) {
-      Alert.alert('Error', 'No se pudo publicar el evento.');
+      Alert.alert('Error', 'No se pudo publicar.');
     } else {
-      Alert.alert('¡Publicado!', 'El evento ya es visible para todos.', [
-        { text: 'OK', onPress: () => router.back() }
-      ]);
+      Alert.alert('¡Publicado!', 'El evento de comarca ya es visible.', [{ text: 'OK', onPress: () => router.back() }]);
     }
     setEnviando(false);
   }
 
   return (
-  <KeyboardAvoidingView
-    style={{ flex: 1 }}
-    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-  >
-    <ScrollView style={styles.container} contentContainerStyle={styles.contenido}>
-      <Text style={styles.titulo}>Nuevo evento comarca</Text>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <Stack.Screen options={{ title: 'Nuevo Evento Comarca', headerStyle: { backgroundColor: '#6C3483' }, headerTintColor: '#fff' }} />
+      <ScrollView style={styles.container} contentContainerStyle={styles.contenido}>
+        <View style={styles.card}>
+          <Text style={styles.label}>Pueblo *</Text>
+          <TextInput style={styles.input} placeholder="Ej: Saldaña" value={form.pueblo} onChangeText={(v) => actualizar('pueblo', v)} />
 
-      <Text style={styles.label}>Pueblo *</Text>
-      <TextInput style={styles.input} placeholder="Ej: Saldaña" placeholderTextColor="#aaa" value={pueblo} onChangeText={setPueblo} />
+          <Text style={styles.label}>Título del evento *</Text>
+          <TextInput style={styles.input} placeholder="Ej: Mercado Medieval" value={form.titulo} onChangeText={(v) => actualizar('titulo', v)} />
 
-      <Text style={styles.label}>Título *</Text>
-      <TextInput style={styles.input} placeholder="Título del evento" placeholderTextColor="#aaa" value={titulo} onChangeText={setTitulo} />
+          <View style={styles.fila}>
+            <View style={{ flex: 1, marginRight: 10 }}>
+              <Text style={styles.label}>Fecha (DD-MM-AAAA)</Text>
+              <TextInput style={styles.input} placeholder="15-07-2026" value={form.fecha} onChangeText={(v) => actualizar('fecha', v)} keyboardType="numeric" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.label}>Hora</Text>
+              <TextInput style={styles.input} placeholder="Ej: 12:00h" value={form.hora} onChangeText={(v) => actualizar('hora', v)} />
+            </View>
+          </View>
 
-      <Text style={styles.label}>Descripción *</Text>
-      <TextInput style={styles.textarea} placeholder="Describe el evento..." placeholderTextColor="#aaa" multiline numberOfLines={6} textAlignVertical="top" value={descripcion} onChangeText={setDescripcion} />
+          <Text style={styles.label}>Lugar *</Text>
+          <TextInput style={styles.input} placeholder="Ej: Plaza Vieja" value={form.lugar} onChangeText={(v) => actualizar('lugar', v)} />
 
-      <Text style={styles.label}>Fecha * (AAAA-MM-DD)</Text>
-      <TextInput style={styles.input} placeholder="2026-07-15" placeholderTextColor="#aaa" value={fecha} onChangeText={setFecha} keyboardType="numeric" />
+          <Text style={styles.label}>Descripción *</Text>
+          <TextInput style={styles.textarea} placeholder="Describe el evento..." multiline value={form.descripcion} onChangeText={(v) => actualizar('descripcion', v)} />
+        </View>
 
-      <Text style={styles.label}>Lugar *</Text>
-      <TextInput style={styles.input} placeholder="Ej: Plaza del Ayuntamiento" placeholderTextColor="#aaa" value={lugar} onChangeText={setLugar} />
-
-      <TouchableOpacity style={[styles.boton, enviando && styles.botonDesactivado]} onPress={publicar} disabled={enviando}>
-        {enviando ? <ActivityIndicator color="#fff" /> : <Text style={styles.botonTexto}>Publicar evento</Text>}
-      </TouchableOpacity>
-    </ScrollView>
-  </KeyboardAvoidingView>
-);
-
+        <TouchableOpacity style={styles.boton} onPress={publicar} disabled={enviando}>
+          {enviando ? <ActivityIndicator color="#fff" /> : <Text style={styles.botonTexto}>Publicar en Comarca</Text>}
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
 }
 
+// Estilos iguales al anterior pero con color morado #6C3483
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  contenido: { padding: 20, paddingTop: 40 },
-  titulo: { fontSize: 22, fontWeight: '800', color: '#1a1a1a', marginBottom: 24 },
-  label: { fontSize: 14, fontWeight: '700', color: '#333', marginBottom: 8 },
-  input: { backgroundColor: '#fff', borderRadius: 12, padding: 14, fontSize: 15, color: '#333', marginBottom: 16, borderWidth: 1, borderColor: '#e0e0e0' },
-  textarea: { backgroundColor: '#fff', borderRadius: 12, padding: 14, fontSize: 15, color: '#333', marginBottom: 16, borderWidth: 1, borderColor: '#e0e0e0', minHeight: 140 },
-  boton: { backgroundColor: '#6C3483', borderRadius: 12, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
-  botonDesactivado: { opacity: 0.6 },
-  botonTexto: { color: '#fff', fontSize: 16, fontWeight: '700' },
-});
+    container: { flex: 1, backgroundColor: '#F5F5F5' },
+    contenido: { padding: 20 },
+    card: { backgroundColor: '#fff', borderRadius: 16, padding: 20, elevation: 3 },
+    label: { fontSize: 13, fontWeight: '700', color: '#6C3483', marginBottom: 8 },
+    input: { backgroundColor: '#f9f9f9', borderRadius: 10, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: '#eee' },
+    textarea: { backgroundColor: '#f9f9f9', borderRadius: 10, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: '#eee', minHeight: 100, textAlignVertical: 'top' },
+    fila: { flexDirection: 'row' },
+    boton: { backgroundColor: '#6C3483', borderRadius: 12, paddingVertical: 16, alignItems: 'center', marginTop: 20 },
+    botonTexto: { color: '#fff', fontSize: 16, fontWeight: '800' },
+  });

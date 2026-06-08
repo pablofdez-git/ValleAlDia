@@ -1,38 +1,42 @@
-import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Image } from 'react-native';
+import { useEffect, useState, useCallback } from 'react';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, RefreshControl } from 'react-native';
+import { Image } from 'expo-image'; // Mejor que Image de RN
 import { useRouter } from 'expo-router';
 import { supabase } from '../../../lib/supabase';
 
 export default function Noticias() {
   const [noticias, setNoticias] = useState([]);
   const [cargando, setCargando] = useState(true);
+  const [refrescando, setRefrescando] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    async function cargarNoticias() {
+  const cargarNoticias = useCallback(async () => {
+    try {
       const { data, error } = await supabase
         .from('noticias')
         .select('*')
         .order('created_at', { ascending: false });
-      if (error) console.error(error);
-      else setNoticias(data);
+
+      if (error) throw error;
+      setNoticias(data);
+    } catch (error) {
+      console.error("Error cargando noticias:", error.message);
+      // Aquí podrías usar un Alert o un Toast
+    } finally {
       setCargando(false);
+      setRefrescando(false);
     }
-    cargarNoticias();
   }, []);
 
-  if (cargando) {
+  useEffect(() => {
+    cargarNoticias();
+  }, [cargarNoticias]);
+
+  if (cargando && !refrescando) {
     return (
       <View style={styles.centrado}>
         <ActivityIndicator size="large" color="#1B4D3E" />
-      </View>
-    );
-  }
-
-  if (noticias.length === 0) {
-    return (
-      <View style={styles.centrado}>
-        <Text style={styles.vacio}>No hay noticias todavía</Text>
+        <Text style={{marginTop: 10, color: '#666'}}>Cargando últimas noticias...</Text>
       </View>
     );
   }
@@ -42,26 +46,29 @@ export default function Noticias() {
       data={noticias}
       keyExtractor={(item) => item.id.toString()}
       contentContainerStyle={styles.lista}
+      refreshControl={
+        <RefreshControl refreshing={refrescando} onRefresh={() => {
+          setRefrescando(true);
+          cargarNoticias();
+        }} colors={['#1B4D3E']} />
+      }
       renderItem={({ item }) => (
         <TouchableOpacity
           style={styles.tarjeta}
           onPress={() => router.push(`/noticias/${item.id}`)}
-          activeOpacity={0.85}
+          activeOpacity={0.9}
         >
-          {item.imagen_url ? (
-            <Image source={{ uri: item.imagen_url }} style={styles.imagen} />
-          ) : (
-            <Image
-            source={require('../../../assets/fondoPredetNoticias.jpg')}
+          <Image
+            source={item.imagen_url || require('../../../assets/fondoPredetNoticias.jpg')}
             style={styles.imagen}
-            />
-          )}
+            contentFit="cover"
+            transition={500} // Efecto de fundido al cargar
+          />
           <View style={styles.contenido}>
-            <Text style={styles.titulo} numberOfLines={2}>{item.titulo}</Text>
-            <Text style={styles.preview} numberOfLines={3}>{item.contenido}</Text>
+            <Text style={styles.titulo}>{item.titulo}</Text>
             <Text style={styles.fecha}>
               {new Date(item.created_at).toLocaleDateString('es-ES', {
-                day: 'numeric', month: 'long', year: 'numeric'
+                day: 'numeric', month: 'short', year: 'numeric'
               })}
             </Text>
           </View>
