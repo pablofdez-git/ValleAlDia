@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "593629087139",
+    "project_id": "vallealdia",
+    "storage_bucket": "vallealdia.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:593629087139:android:3a1b30e8653da5b7444616",
+        "android_client_info": {
+          "package_name": "com.pablofdezcnj.ValleAlDia"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCekm9ufvRFSD6OwlCjbzCCcCkZrnop6b0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

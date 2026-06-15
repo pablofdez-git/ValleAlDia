@@ -1,31 +1,48 @@
 {
   "expo": {
-    "name": "ValleAlDia",
+    "name": "Valle al Día",
     "slug": "ValleAlDia",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icono.png",
     "userInterfaceStyle": "light",
     "scheme": "vallealdia",
+    "splash": {
+      "image": "./assets/icono.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#E6B34B"
+    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.pablofdezcnj.ValleAlDia"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+        "foregroundImage": "./assets/icono.png",
+        "backgroundColor": "#1B4D3E"
+      },
+      "package": "com.pablofdezcnj.ValleAlDia",
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
+        "NOTIFICATIONS"
+      ]
     },
-    "web": {
-      "favicon": "./assets/favicon.png",
-      "bundler": "metro"
+    "extra": {
+      "eas": {
+        "projectId": "42914d13-f061-4c00-8a56-d00ff4cfd266"
+      }
     },
     "plugins": [
       "expo-router",
       "expo-status-bar",
-      "expo-image"
+      "expo-image",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icono.png",
+          "color": "#1B4D3E"
+        }
+      ]
     ]
   }
 }
