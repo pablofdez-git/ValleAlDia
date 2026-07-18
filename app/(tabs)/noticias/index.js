@@ -29,8 +29,8 @@ export default function Noticias() {
   }, []);
 
   useEffect(() => {
-    cargarNoticias();
-  }, [cargarNoticias]);
+    cargarLugares();
+  }, [cargarLugares]);
 
   if (cargando && !refrescando) {
     return (

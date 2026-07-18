@@ -134,6 +134,7 @@ export default function Incidencias() {
           <TextInput
             style={styles.input}
             placeholder="Ej: Farola rota, bache en el camino..."
+            placeholderTextColor="#999"
             value={titulo}
             onChangeText={setTitulo}
           />
@@ -142,6 +143,7 @@ export default function Incidencias() {
           <TextInput
             style={styles.textarea}
             placeholder="Danos más detalles para poder arreglarlo..."
+            placeholderTextColor="#999"
             multiline
             value={descripcion}
             onChangeText={setDescripcion}
@@ -151,6 +153,7 @@ export default function Incidencias() {
           <TextInput
             style={styles.input}
             placeholder="Por si necesitamos contactar contigo"
+            placeholderTextColor="#999"
             value={contacto}
             onChangeText={setContacto}
             keyboardType="phone-pad"

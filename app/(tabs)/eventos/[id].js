@@ -72,7 +72,11 @@ export default function DetalleEvento() {
             </View>
           </View>
           <Text style={styles.subtitulo}>Información</Text>
-          <Text style={styles.descripcion}>{evento.descripcion}</Text>
+          <Text style={styles.descripcion}>
+            {evento.descripcion.split('\n').map((linea, i) => (
+              <Text key={i}>{linea}{'\n'}</Text>
+            ))}
+          </Text>
         </View>
       </ScrollView>
     </>
@@ -83,7 +87,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   centrado: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   contenido: { padding: 24 },
-  btnVolver: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
+  btnVolver: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center', marginLeft: 8 },
   titulo: { fontSize: 26, fontWeight: '900', color: '#1a1a1a', marginBottom: 20 },
   tarjeta: { backgroundColor: '#F8FAFC', borderRadius: 20, padding: 20, marginBottom: 30, borderWidth: 1, borderColor: '#E2E8F0' },
   fila: { flexDirection: 'row', alignItems: 'center' },
