@@ -7,7 +7,7 @@ import {
 import { supabase } from '../../lib/supabase';
 import * as ImagePicker from 'expo-image-picker';
 // CAMBIO CLAVE: Importamos desde /legacy para que readAsStringAsync funcione
-import * as FileSystem from 'expo-file-system/legacy';
+import * as FileSystem from 'expo-file-system';
 import { decode } from 'base64-arraybuffer';
 import { Ionicons } from '@expo/vector-icons';
 import { Stack } from 'expo-router';

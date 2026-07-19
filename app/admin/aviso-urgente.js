@@ -34,7 +34,7 @@ export default function AvisoUrgente() {
     try {
       // 1. Obtener los tokens de Supabase
       const { data: registros, error: errorSupabase } = await supabase
-        .from('notificaciones_tokens')
+        .from('push_tokens')
         .select('token');
 
       if (errorSupabase) {

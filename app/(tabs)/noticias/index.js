@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, RefreshControl } from 'react-native';
-import { Image } from 'expo-image'; // Mejor que Image de RN
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { supabase } from '../../../lib/supabase';
 
@@ -16,12 +16,10 @@ export default function Noticias() {
         .from('noticias')
         .select('*')
         .order('created_at', { ascending: false });
-
       if (error) throw error;
       setNoticias(data);
     } catch (error) {
       console.error("Error cargando noticias:", error.message);
-      // Aquí podrías usar un Alert o un Toast
     } finally {
       setCargando(false);
       setRefrescando(false);
@@ -29,8 +27,8 @@ export default function Noticias() {
   }, []);
 
   useEffect(() => {
-    cargarLugares();
-  }, [cargarLugares]);
+    cargarNoticias();
+  }, [cargarNoticias]);
 
   if (cargando && !refrescando) {
     return (
@@ -47,10 +45,12 @@ export default function Noticias() {
       keyExtractor={(item) => item.id.toString()}
       contentContainerStyle={styles.lista}
       refreshControl={
-        <RefreshControl refreshing={refrescando} onRefresh={() => {
-          setRefrescando(true);
-          cargarNoticias();
-        }} colors={['#1B4D3E']} />
+        <RefreshControl refreshing={refrescando} onRefresh={() => { setRefrescando(true); cargarNoticias(); }} colors={['#1B4D3E']} />
+      }
+      ListEmptyComponent={
+        <View style={styles.centrado}>
+          <Text style={styles.vacio}>No hay noticias todavía</Text>
+        </View>
       }
       renderItem={({ item }) => (
         <TouchableOpacity
@@ -59,10 +59,10 @@ export default function Noticias() {
           activeOpacity={0.9}
         >
           <Image
-            source={item.imagen_url || require('../../../assets/fondoPredetNoticias.jpg')}
+            source={item.imagen_url ? { uri: item.imagen_url } : require('../../../assets/fondoPredetNoticias.jpg')}
             style={styles.imagen}
             contentFit="cover"
-            transition={500} // Efecto de fundido al cargar
+            transition={500}
           />
           <View style={styles.contenido}>
             <Text style={styles.titulo}>{item.titulo}</Text>
@@ -82,19 +82,9 @@ const styles = StyleSheet.create({
   lista: { padding: 16, gap: 12 },
   centrado: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   vacio: { fontSize: 16, color: '#999' },
-  tarjeta: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
-  },
+  tarjeta: { backgroundColor: '#fff', borderRadius: 12, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 3 },
   imagen: { width: '100%', height: 180 },
   contenido: { padding: 14 },
   titulo: { fontSize: 17, fontWeight: '700', color: '#1a1a1a', marginBottom: 6 },
-  preview: { fontSize: 14, color: '#555', lineHeight: 20, marginBottom: 10 },
   fecha: { fontSize: 12, color: '#1B4D3E', fontWeight: '600' },
 });
